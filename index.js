@@ -1,8 +1,8 @@
-const html = require('bel');
-const document = require('global/document');
-const { createElement } = html;
+var html = require('bel');
+var document = require('global/document');
+var createElement = html.createElement;
 
-const TAG_NAMES = {
+var TAG_NAMES = {
   'heading1': 'h1',
   'heading2': 'h2',
   'heading3': 'h3',
@@ -20,7 +20,7 @@ const TAG_NAMES = {
 };
 
 module.exports = function extend(Prismic) {
-  const { Fragments } = Prismic;
+  var Fragments = Prismic.Fragments;
 
   Fragments.Text.prototype.asElement = function () {
     return html`<span>${ this.value }</span>`;
@@ -76,7 +76,9 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.Embed.prototype.asElement = function () {
-    return html(this.value.oembed.html);
+    const div = createElement('div');
+    div.innerHTML = this.value.oembed.html;
+    return div.firstElementChild;
   };
 
   Fragments.Image.prototype.asElement = function () {
@@ -92,11 +94,13 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.Group.prototype.asElement = function (linkResolver) {
-    return this.value.map(value => value.asElement(linkResolver));
+    return this.value.map(function (value) {
+      return value.asElement(linkResolver);
+    });
   };
 
   Fragments.SimpleSlice.prototype.asElement = function (linkResolver) {
-    const classes = ['slice'];
+    var classes = ['slice'];
 
     if (this.label) {
       classes.push(this.label);
@@ -110,7 +114,7 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.CompositeSlice.prototype.asElement = function (linkResolver) {
-    const classes = ['slice'];
+    var classes = ['slice'];
 
     if (this.label) {
       classes.push(this.label);
@@ -118,13 +122,18 @@ module.exports = function extend(Prismic) {
 
     return html`
       <div data-slicetype=${ this.sliceType } class=${ classes.join(' ') }>
-        ${ Object.keys(this.nonRepeat).map(key => this.nonRepeat[key].asElement(linkResolver)) }
+        ${ Object.keys(this.nonRepeat).map(function (key) {
+          return this.nonRepeat[key].asElement(linkResolver);
+        }) }
         ${ this.repeat.asElement(linkResolver) }
-      </div>`;
+      </div>
+    `;
   };
 
   Fragments.SliceZone.prototype.asElement = function (linkResolver) {
-    return this.value.map(value => value.asElement(linkResolver));
+    return this.value.map(function (value) {
+      return value.asElement(linkResolver);
+    });
   };
 
   /**
@@ -133,8 +142,8 @@ module.exports = function extend(Prismic) {
    */
 
   Fragments.StructuredText.prototype.asElement = function (linkResolver) {
-    let group;
-    const groups = [];
+    var group;
+    var groups = [];
 
     if (!Array.isArray(this.blocks)) {
       return [];
@@ -142,14 +151,18 @@ module.exports = function extend(Prismic) {
 
     if (typeof linkResolver !== 'function' && typeof linkResolver === 'object') {
       // Backward compatibility with the old ctx argument
-      const ctx = linkResolver;
-      linkResolver = (doc, isBroken) => ctx.linkResolver(ctx, doc, isBroken);
+      var ctx = linkResolver;
+      linkResolver = function (doc, isBroken) {
+        return ctx.linkResolver(ctx, doc, isBroken);
+      };
     }
 
-    for (const block of this.blocks) {
+    this.blocks.forEach(function (block) {
+      var link;
+
       // Resolve image links
       if (block.type == 'image' && block.linkTo) {
-        const link = Fragments.initField(block.linkTo);
+        link = Fragments.initField(block.linkTo);
         block.linkUrl = link.url(linkResolver);
       }
 
@@ -157,10 +170,10 @@ module.exports = function extend(Prismic) {
         // it's not a type that groups
         groups.push(block);
         group = null;
-      } else if (!group || group.type !== `group-${ block.type }`) {
+      } else if (!group || group.type !== 'group-' + block.type) {
         // it's a new type or no BlockGroup was set so far
         group = {
-          type: `group-${ block.type }`,
+          type: 'group-' + block.type,
           blocks: [block]
         };
         groups.push(group);
@@ -168,17 +181,21 @@ module.exports = function extend(Prismic) {
         // it's the same type as before, no touching group
         group.blocks.push(block);
       }
-    }
+    });
 
     function blockContent(block) {
       if (block.blocks) {
-        return block.blocks.map(block => asElement(block, blockContent(block)));
+        return block.blocks.map(function (block) {
+          return asElement(block, blockContent(block));
+        });
       }
 
       return insertSpans(block.text, block.spans, linkResolver);
     }
 
-    return groups.map(group => asElement(group, blockContent(group)));
+    return groups.map(function (group) {
+      return asElement(group, blockContent(group));
+    });
   };
 
   function insertSpans(text, spans, linkResolver) {
@@ -186,31 +203,32 @@ module.exports = function extend(Prismic) {
       return document.createTextNode(text);
     }
 
-    const start = {};
-    const end = {};
+    var start = {};
+    var end = {};
+    var top = 0;
+    var content = '';
+    var html = [];
+    var stack = [];
 
-    for (const span of spans) {
+    spans.forEach(function (span) {
       if (!start[span.start]) { start[span.start] = []; }
       if (!end[span.end]) { end[span.end] = []; }
 
       start[span.start].push(Object.assign({}, span));
       end[span.end].unshift(Object.assign({}, span));
-    }
+    });
 
     /**
      * Sort bigger tags first to ensure the correct tag hierarchy
      */
 
-    Object.keys(start).forEach(key => {
-      start[key].sort((a, b) => (b.end - b.start) - (a.end - a.start));
+    Object.keys(start).forEach(function (key) {
+      start[key].sort(function (a, b) {
+        return (b.end - b.start) - (a.end - a.start);
+      });
     });
 
-    let top = 0;
-    let content = '';
-    const html = [];
-    const stack = [];
-
-    for (let i = 0, len = text.length + 1; i < len; i += 1) {
+    for (var i = 0, len = text.length + 1; i < len; i += 1) {
       if (end[i]) {
         end[i].forEach(close);
       }
@@ -249,7 +267,7 @@ module.exports = function extend(Prismic) {
      */
 
     function close() {
-      const element = stack.pop();
+      var element = stack.pop();
 
       element.appendChild(document.createTextNode(content));
       content = '';
@@ -270,7 +288,7 @@ module.exports = function extend(Prismic) {
 
     function open(span) {
       if (span.type === 'hyperlink') {
-        const fragment = Fragments.initField(span.data);
+        var fragment = Fragments.initField(span.data);
 
         if (fragment) {
           span.url = fragment.url(linkResolver);
@@ -290,48 +308,46 @@ module.exports = function extend(Prismic) {
   }
 
   function asElement(element, content) {
-    if (TAG_NAMES[element.type]) {
-      const tag = TAG_NAMES[element.type];
-      const props = {};
+    var children = [];
+    var props = {};
 
+    if (TAG_NAMES[element.type]) {
       if (element.label) {
         props.className = element.label;
       }
 
-      let children = content;
+      children = content;
       if (typeof children === 'string') {
         children = [document.createTextNode(children)];
       } else if (!Array.isArray(children)) {
         children = [children];
       }
 
-      return createElement(tag, props, children);
+      return createElement(TAG_NAMES[element.type], props, children);
     }
 
     if (element.type === 'image') {
-      const image = createElement('img', {
+      children.push(createElement('img', {
         src: element.url,
         alt: element.alt || null,
         copyright: element.copyright || null
-      });
+      }));
 
-      const children = [];
       if (element.linkUrl) {
-        children.push(createElement('a', { href: element.linkUrl }, [ image ]));
-      } else {
-        children.push(image);
+        props.href = element.linkUrl;
+        children = [createElement('a', props, children.slice())];
       }
 
-      const classNames = ['block-img'];
+      props.className = 'block-img';
       if (element.label) {
-        classNames.push(element.label);
+        props.className += element.label;
       }
 
-      return createElement('p', { className: classNames.join(' ') }, children);
+      return createElement('p', props, children);
     }
 
     if (element.type === 'embed') {
-      const props = {
+      props = {
         'data-oembed': element.embed_url,
         'data-oembed-type': element.type,
         'data-oembed-provider': element.provider.name
@@ -341,7 +357,7 @@ module.exports = function extend(Prismic) {
         props.className = element.label;
       }
 
-      const oembed = createElement('div', props);
+      var oembed = createElement('div', props);
 
       /**
        * This is fuggly and kinda insecure – YOLO
@@ -362,7 +378,7 @@ module.exports = function extend(Prismic) {
 
     return html`
       <div>
-        <!-- Warning: "${ element.type }" not implemented. Upgrade the Developer Kit. -->
+        <!-- Warning: element type not implemented. Upgrade the Developer Kit. -->
         ${ content }
       </div>
     `;
