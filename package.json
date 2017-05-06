@@ -1,0 +1,36 @@
+{
+  "name": "prismic-element",
+  "version": "0.1.0",
+  "description": "Render Prismic.io fragments as DOM elements",
+  "main": "index.js",
+  "scripts": {
+    "posttest": "eslint .",
+    "test": "tape test/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tornqvist/prismic-element.git"
+  },
+  "keywords": [
+    "prismic.io",
+    "bel",
+    "template",
+    "cms",
+    "html"
+  ],
+  "author": "Carl Törnqvist <calle.tornqvist@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tornqvist/prismic-element/issues"
+  },
+  "homepage": "https://github.com/tornqvist/prismic-element#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "prismic.io": "^3.5.6",
+    "tape": "^4.6.3"
+  },
+  "dependencies": {
+    "bel": "^4.6.1",
+    "global": "^4.3.2"
+  }
+}
