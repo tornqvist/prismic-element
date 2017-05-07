@@ -1,6 +1,5 @@
 var html = require('bel');
 var document = require('global/document');
-var createElement = html.createElement;
 
 var TAG_NAMES = {
   'heading1': 'h1',
@@ -76,7 +75,7 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.Embed.prototype.asElement = function () {
-    const div = createElement('div');
+    const div = html`<div></div>`;
     div.innerHTML = this.value.oembed.html;
     return div.firstElementChild;
   };
@@ -308,6 +307,7 @@ module.exports = function extend(Prismic) {
   }
 
   function asElement(element, content) {
+    var tag;
     var children = [];
     var props = {};
 
@@ -316,26 +316,32 @@ module.exports = function extend(Prismic) {
         props.className = element.label;
       }
 
-      children = content;
-      if (typeof children === 'string') {
-        children = [document.createTextNode(children)];
-      } else if (!Array.isArray(children)) {
-        children = [children];
+      if (Array.isArray(content)) {
+        children = content;
+      } else if (typeof content === 'string') {
+        children.push(document.createTextNode(content));
+      } else if (typeof content !== 'undefined') {
+        children.push(content);
       }
 
-      return createElement(TAG_NAMES[element.type], props, children);
+      tag = document.createElement(TAG_NAMES[element.type]);
+      Object.keys(props).forEach(function (prop) {
+        return tag.setAttribute(prop, props[prop]);
+      });
+      for (var i = 0; i < children.length; i += 1) {
+        tag.appendChild(children[i]);
+      }
+
+      return tag;
     }
 
     if (element.type === 'image') {
-      children.push(createElement('img', {
-        src: element.url,
-        alt: element.alt || null,
-        copyright: element.copyright || null
-      }));
+      children.push(html`
+        <img src=${ element.url } alt=${ element.alt || null } copyright=${ element.copyright || null } />
+      `);
 
       if (element.linkUrl) {
-        props.href = element.linkUrl;
-        children = [createElement('a', props, children.slice())];
+        children = [html`<a href=${ element.linkUrl }>${ children.slice() }</a>`];
       }
 
       props.className = 'block-img';
@@ -343,7 +349,7 @@ module.exports = function extend(Prismic) {
         props.className += element.label;
       }
 
-      return createElement('p', props, children);
+      return html`<p class="${ props.className }">${ children }</p>`;
     }
 
     if (element.type === 'embed') {
@@ -357,15 +363,19 @@ module.exports = function extend(Prismic) {
         props.className = element.label;
       }
 
-      var oembed = createElement('div', props);
+      tag = html`<div></div>`;
+
+      Object.keys(props).forEach(function (prop) {
+        return tag.setAttribute(prop, props[prop]);
+      });
 
       /**
        * This is fuggly and kinda insecure – YOLO
        */
 
-      oembed.innerHTML = element.oembed.html;
+      tag.innerHTML = element.oembed.html;
 
-      return oembed;
+      return tag;
     }
 
     if (element.type === 'hyperlink') {
