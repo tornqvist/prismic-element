@@ -1,31 +1,24 @@
 # prismic-element
 
-> Extend all Prismic.io `Fragments` with a method that renders them as actual DOM elements.
+Mimics [prismic-dom](https://github.com/prismicio/prismic-dom) except that it renders _real_ DOM nodes and not just HTML strings.
+
+*NOTE:*
+
+Requires version 2 of the Prismic.io API and the compatible JavaScript library [prismic-javascript](https://github.com/prismicio/prismic-javascript).
 
 ## Usage
 
-Pass the Prismic object to the function and then simply call `asElement` on your document fragments.
-
-All fragments return a single DOM element except `Group`, `SliceZone`, and `StructuredText` which return an array if DOM elements.
+Pass a rich text object to the function and get HTML Element(s) back.
 
 ```javascript
-const Prismic = require('prismic.io');
-const prismicElement = require('prismic-element');
-
-prismicElement(Prismic);
+const Prismic = require('prismic-javascript');
+const asElement = require('prismic-element');
 
 Prismic.api('https://<YOUR_API_ENDPOINT>.cdn.prismic.io/api').then(api => {
   api.getSingle('my-page').then(doc => {
-    const elements = doc.getStructuredText('my-page.body').asElement(resolve);
-    for (const element of elements) {
-      document.body.appendChild(element);
-    }
+    document.body.appendChild(asElement(doc.data.body));
   });
 });
-
-function resolve(doc) {
-  return doc.slug;
-}
 ```
 
 ## With bel
@@ -34,33 +27,27 @@ Working with DOM elements integrates beautifully with tools such as [bel](https:
 
 ```javascript
 const html = require('bel');
-const Prismic = require('prismic.io');
-const prismicElement = require('prismic-element');
-
-prismicElement(Prismic);
+const Prismic = require('prismic-javascript');
+const asElement = require('prismic-element');
 
 Prismic.api('https://<YOUR_API_ENDPOINT>.cdn.prismic.io/api').then(api => {
   api.getSingle('my-page').then(doc => {
     document.body.appendChild(html`
       <article>
-        ${ doc.getText('my-page.title').asElement() }
+        ${ asElement(doc.data.title) }
 
         <figure>
-          ${ doc.getImage('my-page.image').asElement() }
-          <figcaption>${ doc.getImage('my-page.image').alt }</figcaption>
+          ${ asElement(doc.data.image) }
+          <figcaption>${ doc.data.image.alt }</figcaption>
         </figure>
 
         <hr />
 
-        ${ doc.getStructuredText('my-page.body').asElement(resolve) }
+        ${ asElement(doc.data.body) }
       </article>
     `);
   });
 });
-
-function resolve(doc) {
-  return doc.slug;
-}
 ```
 
 ## See also

@@ -1,7 +1,7 @@
 {
   "name": "prismic-element",
   "version": "0.2.2",
-  "description": "Render Prismic.io fragments as DOM elements",
+  "description": "Render Prismic.io fragments as (real) DOM elements",
   "main": "index.js",
   "scripts": {
     "posttest": "eslint .",
@@ -26,10 +26,11 @@
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
     "eslint": "^3.19.0",
-    "prismic.io": "^3.5.6",
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "bel": "^5.0.3"
+    "bel": "^5.0.3",
+    "prismic-helpers": "^1.0.0",
+    "prismic-richtext": "^0.2.2"
   }
 }
