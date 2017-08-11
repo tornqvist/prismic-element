@@ -1,22 +1,21 @@
 var html = require('bel');
-var document = require('global/document');
 
-var TAG_NAMES = {
-  'heading1': 'h1',
-  'heading2': 'h2',
-  'heading3': 'h3',
-  'heading4': 'h4',
-  'heading5': 'h5',
-  'heading6': 'h6',
-  'paragraph': 'p',
-  'preformatted': 'pre',
-  'list-item': 'li',
-  'o-list-item': 'li',
-  'group-list-item': 'ul',
-  'group-o-list-item': 'ol',
-  'strong': 'strong',
-  'em': 'em'
-};
+var TAG_NAMES = [
+  'heading1',
+  'heading2',
+  'heading3',
+  'heading4',
+  'heading5',
+  'heading6',
+  'paragraph',
+  'preformatted',
+  'list-item',
+  'o-list-item',
+  'group-list-item',
+  'group-o-list-item',
+  'strong',
+  'em'
+];
 
 module.exports = function extend(Prismic) {
   var Fragments = Prismic.Fragments;
@@ -26,21 +25,21 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.DocumentLink.prototype.asElement = function (ctx) {
-    return html`<a href=${ this.url(ctx) }>${ this.url(ctx) }</a>`;
+    return html`<a href="${ this.url(ctx) }">${ this.url(ctx) }</a>`;
   };
 
   Fragments.WebLink.prototype.asElement = function () {
-    return html`<a href=${ this.url() }>${ this.url() }</a>`;
+    return html`<a href="${ this.url() }">${ this.url() }</a>`;
   };
 
   Fragments.FileLink.prototype.asElement = function () {
-    return html`<a href=${ this.url() }>${ this.value.file.name }</a>`;
+    return html`<a href="${ this.url() }">${ this.value.file.name }</a>`;
   };
 
   Fragments.ImageLink.prototype.asElement = function () {
     return html`
       <a href=${ this.url }>
-        <img src=${ this.url() } alt=${ this.alt || null } copyright=${ this.copyright || null } />
+        <img src="${ this.url() }" alt="${ this.alt || null }" copyright="${ this.copyright || null }" />
       </a>
     `;
   };
@@ -75,9 +74,7 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.Embed.prototype.asElement = function () {
-    const div = html`<div></div>`;
-    div.innerHTML = this.value.oembed.html;
-    return div.firstElementChild;
+    return html([this.value.oembed.html]);
   };
 
   Fragments.Image.prototype.asElement = function () {
@@ -85,7 +82,7 @@ module.exports = function extend(Prismic) {
   };
 
   Fragments.ImageView.prototype.asElement = function () {
-    return html`<img src=${ this.url } width=${ this.width } height=${ this.height } alt=${ this.alt || null } copyright=${ this.copyright || null } />`;
+    return html`<img src="${ this.url }" width="${ this.width }" height="${ this.height }" alt="${ this.alt || null }" copyright="${ this.copyright || null }" />`;
   };
 
   Fragments.Separator.prototype.asElement = function () {
@@ -106,7 +103,7 @@ module.exports = function extend(Prismic) {
     }
 
     return html`
-      <div data-slicetype=${ this.sliceType } class=${ classes.join(' ') }>
+      <div data-slicetype="${ this.sliceType }" class="${ classes.join(' ') }">
         ${ this.value.asElement(linkResolver) }
       </div>
     `;
@@ -120,7 +117,7 @@ module.exports = function extend(Prismic) {
     }
 
     return html`
-      <div data-slicetype=${ this.sliceType } class=${ classes.join(' ') }>
+      <div data-slicetype="${ this.sliceType }" class="${ classes.join(' ') }">
         ${ Object.keys(this.nonRepeat).map(function (key) {
           return this.nonRepeat[key].asElement(linkResolver);
         }) }
@@ -199,7 +196,7 @@ module.exports = function extend(Prismic) {
 
   function insertSpans(text, spans, linkResolver) {
     if (!spans || !spans.length) {
-      return document.createTextNode(text);
+      return text;
     }
 
     var start = {};
@@ -213,12 +210,14 @@ module.exports = function extend(Prismic) {
       if (!start[span.start]) { start[span.start] = []; }
       if (!end[span.end]) { end[span.end] = []; }
 
-      start[span.start].push(Object.assign({}, span));
-      end[span.end].unshift(Object.assign({}, span));
+      var children = [];
+
+      start[span.start].push(Object.assign({ children: children }, span));
+      end[span.end].unshift(Object.assign({ children: children }, span));
     });
 
     /**
-     * Sort bigger tags first to ensure the correct tag hierarchy
+     * Sort longer tags first to ensure the correct tag hierarchy
      */
 
     Object.keys(start).forEach(function (key) {
@@ -235,9 +234,9 @@ module.exports = function extend(Prismic) {
       if (start[i]) {
         if (content.length) {
           if (stack[top]) {
-            stack[top].appendChild(document.createTextNode(content));
+            stack[top].children.push(content);
           } else {
-            html.push(document.createTextNode(content));
+            html.push(content);
           }
 
           content = '';
@@ -256,7 +255,7 @@ module.exports = function extend(Prismic) {
      */
 
     if (content.length) {
-      html.push(document.createTextNode(content));
+      html.push(content);
     }
 
     return html;
@@ -266,9 +265,9 @@ module.exports = function extend(Prismic) {
      */
 
     function close() {
-      var element = stack.pop();
+      var props = stack.pop();
+      var element = asElement(props, props.children.concat(content));
 
-      element.appendChild(document.createTextNode(content));
       content = '';
 
       if (top === 0) {
@@ -277,7 +276,7 @@ module.exports = function extend(Prismic) {
       } else {
         // Add the content to the parent tag
         top -= 1;
-        stack[top].appendChild(element);
+        stack[top].children.push(element);
       }
     }
 
@@ -302,88 +301,127 @@ module.exports = function extend(Prismic) {
        * Add element to stack and save a reference to it's index (length - 1)
        */
 
-      top = stack.push(asElement(span)) - 1;
+      top = stack.push(span) - 1;
     }
   }
 
   function asElement(element, content) {
-    var tag;
+    var result;
     var children = [];
-    var props = {};
+    var className = element.label || null;
 
-    if (TAG_NAMES[element.type]) {
-      if (element.label) {
-        props.className = element.label;
-      }
-
+    if (TAG_NAMES.indexOf(element.type) !== -1) {
       if (Array.isArray(content)) {
         children = content;
-      } else if (typeof content === 'string') {
-        children.push(document.createTextNode(content));
       } else if (typeof content !== 'undefined') {
         children.push(content);
       }
 
-      tag = document.createElement(TAG_NAMES[element.type]);
-      Object.keys(props).forEach(function (prop) {
-        return tag.setAttribute(prop, props[prop]);
-      });
-      for (var i = 0; i < children.length; i += 1) {
-        tag.appendChild(children[i]);
+      switch (element.type) {
+        case 'heading1': return html`
+          <h1 class="${ className }">${ children }</h1>
+        `;
+        case 'heading2': return html`
+          <h2 class="${ className }">${ children }</h2>
+        `;
+        case 'heading3': return html`
+          <h3 class="${ className }">${ children }</h3>
+        `;
+        case 'heading4': return html`
+          <h4 class="${ className }">${ children }</h4>
+        `;
+        case 'heading5': return html`
+          <h5 class="${ className }">${ children }</h5>
+        `;
+        case 'heading6': return html`
+          <h6 class="${ className }">${ children }</h6>
+        `;
+        case 'paragraph': return html`
+          <p class="${ className }">${ children }</p>
+        `;
+        case 'preformatted': return html`
+          <pre class="${ className }">${ children }</pre>
+        `;
+        case 'list-item': return html`
+          <li class="${ className }">${ children }</li>
+        `;
+        case 'o-list-item': return html`
+          <li class="${ className }">${ children }</li>
+        `;
+        case 'group-list-item': return html`
+          <ul class="${ className }">${ children }</ul>
+        `;
+        case 'group-o-list-item': return html`
+          <ol class="${ className }">${ children }</ol>
+        `;
+        case 'strong': return html`
+          <strong class="${ className }">${ children }</strong>
+        `;
+        case 'em': return html`
+          <em class="${ className }">${ children }</em>
+        `;
+        default: return html`
+          <div>
+            <!-- Warning: element type not implemented. Upgrade the Developer Kit. -->
+            ${ content }
+          </div>
+        `;
       }
-
-      return tag;
     }
 
     if (element.type === 'image') {
       children.push(html`
-        <img src=${ element.url } alt=${ element.alt || null } copyright=${ element.copyright || null } />
+        <img src="${ element.url }" alt="${ element.alt || null }" copyright="${ element.copyright || null }" />
       `);
 
       if (element.linkUrl) {
-        children = [html`<a href=${ element.linkUrl }>${ children.slice() }</a>`];
+        children = [
+          html`<a href="${ element.linkUrl }">${ children.slice() }</a>`
+        ];
       }
 
-      props.className = 'block-img';
-      if (element.label) {
-        props.className += element.label;
-      }
+      className = (className || '') + 'block-img';
 
-      return html`<p class="${ props.className }">${ children }</p>`;
+      return html`<p class="${ className }">${ children }</p>`;
     }
 
     if (element.type === 'embed') {
-      props = {
-        'data-oembed': element.embed_url,
-        'data-oembed-type': element.type,
-        'data-oembed-provider': element.provider.name
-      };
-
-      if (element.label) {
-        props.className = element.label;
-      }
-
-      tag = html`<div></div>`;
-
-      Object.keys(props).forEach(function (prop) {
-        return tag.setAttribute(prop, props[prop]);
-      });
 
       /**
-       * This is fuggly and kinda insecure – YOLO
+       * Take special care to avoid escaping HTML
+       * @see pelo (https://github.com/shuhei/pelo/blob/master/index.js#L28)
        */
 
-      tag.innerHTML = element.oembed.html;
+      if (typeof window === 'undefined') {
+        children = new String(element.oembed.html);
+        children.__encoded = true;
+      } else {
+        children = null;
+      }
 
-      return tag;
+      result = html`
+        <div data-oembed-type="embed" data-oembed="${ element.embed_url || null }" data-oembed-provider="${ element.provider.name || null }">
+          ${ children }
+        </div>
+      `;
+
+      /**
+       * Dangerously set inner HTML
+       */
+
+      if (typeof window !== 'undefined') {
+        result.innerHTML = element.oembed.html;
+      }
+
+      return result;
     }
 
     if (element.type === 'hyperlink') {
-      return html`<a href=${ element.url }>${ content }</a>`;
+      return html`<a href="${ element.url }">${ content }</a>`;
     }
 
     if (element.type === 'label') {
-      return html`<span class=${ element.data.label }>${ content }</span>`;
+      return html`<span class="${ element.data.label }">${ content }</span>`;
     }
 
     return html`
