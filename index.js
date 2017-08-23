@@ -5,7 +5,7 @@ var LinkHelper = require('prismic-helpers').Link;
 var Elements = PrismicRichText.Elements;
 
 function serialize(linkResolver, type, element, content, children) {
-  var className = element.label || null;
+  var className = element.label || '';
 
   switch(type) {
     case Elements.heading1: return html`<h1 class="${ className }">${ children }</h1>`;
@@ -37,9 +37,9 @@ function serialize(linkResolver, type, element, content, children) {
 }
 
 function serializeImage(linkResolver, element) {
-  var linkUrl = element.linkTo ? LinkHelper.url(element.linkTo, linkResolver) : null;
+  var linkUrl = element.linkTo ? LinkHelper.url(element.linkTo, linkResolver) : '';
   var wrapperClassList = [ element.label || '', 'block-img' ];
-  var img = html`<img src="${ element.url }" alt="${ element.alt || '' }" copyright="${ element.copyright || null }">`;
+  var img = html`<img src="${ element.url }" alt="${ element.alt || '' }" copyright="${ element.copyright || '' }">`;
 
   return html`
     <p class="${ wrapperClassList.join(' ') }">
@@ -64,7 +64,7 @@ function serializeEmbed(element) {
   }
 
   result = html`
-    <div data-oembed="${ element.embed_url }" data-oembed-type="${ element.type }" data-oembed-provider="${ element.provider_name } class="${ element.label || null }">
+    <div data-oembed="${ element.embed_url || '' }" data-oembed-type="${ element.type || '' }" data-oembed-provider="${ element.provider_name || '' } class="${ element.label || '' }">
       ${ children }
     </div>
   `;
@@ -85,7 +85,7 @@ function serializeHyperlink(linkResolver, element, children) {
 }
 
 function serializeLabel(element, children) {
-  return html`<span class="${ element.data.label || null }>${ children }</span>`;
+  return html`<span class="${ element.data.label || '' }>${ children }</span>`;
 }
 
 module.exports = function asElement(richText, linkResolver, serializer) {
