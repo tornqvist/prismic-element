@@ -64,7 +64,7 @@ function serializeEmbed(element) {
   }
 
   result = html`
-    <div data-oembed="${ element.embed_url || '' }" data-oembed-type="${ element.type || '' }" data-oembed-provider="${ element.provider_name || '' } class="${ element.label || '' }">
+    <div data-oembed="${ element.embed_url || '' }" data-oembed-type="${ element.type || '' }" data-oembed-provider="${ element.provider_name || '' }" class="${ element.label || '' }">
       ${ children }
     </div>
   `;
