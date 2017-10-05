@@ -85,7 +85,7 @@ function serializeHyperlink(linkResolver, element, children) {
 }
 
 function serializeLabel(element, children) {
-  return html`<span class="${ element.data.label || '' }>${ children }</span>`;
+  return html`<span class="${ element.data.label || '' }">${ children }</span>`;
 }
 
 module.exports = function asElement(richText, linkResolver, serializer) {
