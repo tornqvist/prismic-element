@@ -29,7 +29,7 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "bel": "^5.0.3",
+    "bel": "^5.1.3",
     "prismic-helpers": "^1.0.0",
     "prismic-richtext": "^0.2.2"
   }

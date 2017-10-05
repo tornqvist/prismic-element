@@ -1,4 +1,5 @@
 var html = require('bel');
+var raw = require('bel/raw');
 var PrismicRichText = require('prismic-richtext');
 var LinkHelper = require('prismic-helpers').Link;
 
@@ -49,35 +50,11 @@ function serializeImage(linkResolver, element) {
 }
 
 function serializeEmbed(element) {
-  var result, children;
-
-  /**
-   * Take special care to avoid escaping HTML
-   * @see pelo (https://github.com/shuhei/pelo/blob/master/index.js#L28)
-   */
-
-  if (typeof window === 'undefined') {
-    children = new String(element.oembed.html);
-    children.__encoded = true;
-  } else {
-    children = null;
-  }
-
-  result = html`
+  return html`
     <div data-oembed="${ element.embed_url || '' }" data-oembed-type="${ element.type || '' }" data-oembed-provider="${ element.provider_name || '' }" class="${ element.label || '' }">
-      ${ children }
+      ${ raw(element.oembed.html) }
     </div>
   `;
-
-  /**
-   * Dangerously set inner HTML
-   */
-
-  if (typeof window !== 'undefined') {
-    result.innerHTML = element.oembed.html;
-  }
-
-  return result;
 }
 
 function serializeHyperlink(linkResolver, element, children) {
