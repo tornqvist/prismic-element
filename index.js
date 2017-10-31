@@ -27,13 +27,14 @@ function serialize(linkResolver, type, element, content, children) {
     case Elements.embed: return serializeEmbed(element);
     case Elements.hyperlink: return serializeHyperlink(linkResolver, element, children);
     case Elements.label: return serializeLabel(element, children);
-    case Elements.span: return content;
-    default: return html`
-      <div>
-        <!-- Warning: element type not implemented. Upgrade the Developer Kit. -->
-        ${ content }
-      </div>
-    `;
+    case Elements.span: {
+      if (!content || content.indexOf('\n') === -1) {
+        return content;
+      }
+
+      return raw(content.replace(/\n/g, '<br />'));
+    }
+    default: return null;
   }
 }
 
