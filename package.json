@@ -4,7 +4,7 @@
   "description": "Render Prismic.io fragments as (real) DOM elements",
   "main": "index.js",
   "scripts": {
-    "posttest": "eslint .",
+    "posttest": "standard",
     "test": "tape test/**/*.js"
   },
   "repository": {
@@ -16,7 +16,8 @@
     "bel",
     "template",
     "cms",
-    "html"
+    "html",
+    "choo"
   ],
   "author": "Carl Törnqvist <calle.tornqvist@gmail.com>",
   "license": "MIT",
@@ -25,7 +26,7 @@
   },
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
-    "eslint": "^3.19.0",
+    "standard": "^10.0.3",
     "tape": "^4.6.3"
   },
   "dependencies": {
