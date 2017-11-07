@@ -32,6 +32,6 @@
   "dependencies": {
     "bel": "^5.1.5",
     "prismic-helpers": "^1.0.0",
-    "prismic-richtext": "^0.2.2"
+    "prismic-richtext": "^0.2.7"
   }
 }
