@@ -67,7 +67,7 @@ function serializeLabel (element, children) {
 }
 
 function serializeSpan (content) {
-  if (content && content.indexOf('\n') === -1) {
+  if (content && content.indexOf('\n') !== -1) {
     return raw(content.replace(/\n/g, '<br />'))
   }
   return content
