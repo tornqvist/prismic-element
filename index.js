@@ -5,6 +5,8 @@ var LinkHelper = require('prismic-helpers').Link;
 
 var Elements = PrismicRichText.Elements;
 
+module.exports = asElement;
+
 function serialize(linkResolver, type, element, content, children) {
   var className = element.label || '';
 
@@ -27,13 +29,7 @@ function serialize(linkResolver, type, element, content, children) {
     case Elements.embed: return serializeEmbed(element);
     case Elements.hyperlink: return serializeHyperlink(linkResolver, element, children);
     case Elements.label: return serializeLabel(element, children);
-    case Elements.span: {
-      if (!content || content.indexOf('\n') === -1) {
-        return content;
-      }
-
-      return raw(content.replace(/\n/g, '<br />'));
-    }
+    case Elements.span: return serializeSpan(content);
     default: return null;
   }
 }
@@ -59,6 +55,10 @@ function serializeEmbed(element) {
 }
 
 function serializeHyperlink(linkResolver, element, children) {
+  var href = LinkHelper.url(element.data, linkResolver);
+  if (element.data.target && element.data.target === '_blank') {
+    return html`<a href="${ href }" target="_blank" rel="noopener noreferrer">${ children }</a>`;
+  }
   return html`<a href="${ LinkHelper.url(element.data, linkResolver) }">${ children }</a>`;
 }
 
@@ -66,7 +66,14 @@ function serializeLabel(element, children) {
   return html`<span class="${ element.data.label || '' }">${ children }</span>`;
 }
 
-module.exports = function asElement(richText, linkResolver, serializer) {
+function serializeSpan(content) {
+  if (content && content.indexOf('\n') === -1) {
+    return raw(content.replace(/\n/g, '<br />'));
+  }
+  return content;
+}
+
+function asElement(richText, linkResolver, serializer) {
   var element = PrismicRichText.serialize(richText, serialize.bind(null, linkResolver), serializer);
 
   if (element.length === 1) {
@@ -74,4 +81,4 @@ module.exports = function asElement(richText, linkResolver, serializer) {
   }
 
   return element;
-};
+}
