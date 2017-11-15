@@ -7,6 +7,11 @@
     "posttest": "standard",
     "test": "tape test/**/*.js"
   },
+  "browserify": {
+    "transform": [
+      "yo-yoify"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tornqvist/prismic-element.git"
@@ -27,7 +32,8 @@
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
     "standard": "^10.0.3",
-    "tape": "^4.6.3"
+    "tape": "^4.6.3",
+    "yo-yoify": "^4.1.0"
   },
   "dependencies": {
     "bel": "^5.1.5",
