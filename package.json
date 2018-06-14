@@ -1,6 +1,6 @@
 {
   "name": "prismic-element",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Render Prismic.io fragments as (real) DOM elements",
   "main": "index.js",
   "scripts": {
@@ -32,12 +32,12 @@
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
     "standard": "^10.0.3",
-    "tape": "^4.6.3",
-    "yo-yoify": "^4.1.0"
+    "tape": "^4.6.3"
   },
   "dependencies": {
     "bel": "^5.1.5",
     "prismic-helpers": "^1.0.0",
-    "prismic-richtext": "^0.2.7"
+    "prismic-richtext": "^0.4.0",
+    "yo-yoify": "^4.1.0"
   }
 }
