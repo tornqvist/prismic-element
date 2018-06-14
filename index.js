@@ -1,5 +1,5 @@
-var html = require('bel')
-var raw = require('bel/raw')
+var html = require('nanohtml')
+var raw = require('nanohtml/raw')
 var PrismicRichText = require('prismic-richtext')
 var LinkHelper = require('prismic-helpers').Link
 

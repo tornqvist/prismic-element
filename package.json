@@ -9,7 +9,7 @@
   },
   "browserify": {
     "transform": [
-      "yo-yoify"
+      "nanohtml"
     ]
   },
   "repository": {
@@ -35,9 +35,8 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "bel": "^5.1.5",
+    "nanohtml": "^1.2.4",
     "prismic-helpers": "^1.0.0",
-    "prismic-richtext": "^0.4.0",
-    "yo-yoify": "^4.1.0"
+    "prismic-richtext": "^0.4.0"
   }
 }
