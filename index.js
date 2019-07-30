@@ -65,11 +65,12 @@ function serializeEmbed (element) {
 }
 
 function serializeHyperlink (linkResolver, element, children) {
-  var href = LinkHelper.url(element.data, linkResolver)
+  var attrs = { href: LinkHelper.url(element.data, linkResolver) }
   if (element.data.target && element.data.target === '_blank') {
-    return html`<a href="${href}" target="_blank" rel="noopener noreferrer">${children}</a>`
+    attrs.target = '_blank'
+    attrs.rel = 'noopener noreferrer'
   }
-  return html`<a href="${LinkHelper.url(element.data, linkResolver)}">${children}</a>`
+  return html`<a ${attrs}>${children}</a>`
 }
 
 function serializeLabel (element, children) {
