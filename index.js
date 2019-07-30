@@ -91,10 +91,6 @@ function serializeSpan (content) {
 
 function asElement (richText, linkResolver, serializer) {
   var element = PrismicRichText.serialize(richText, serialize.bind(null, linkResolver), serializer)
-
-  if (element.length === 1) {
-    return element[0]
-  }
-
+  if (element.length === 1) return element[0]
   return element
 }
