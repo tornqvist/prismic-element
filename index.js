@@ -80,10 +80,13 @@ function serializeLabel (element, children) {
 }
 
 function serializeSpan (content) {
-  if (content && content.indexOf('\n') !== -1) {
-    return raw(content.replace(/\n/g, '<br />'))
-  }
-  return content
+  return html`
+    ${content.split('\n').reduce(function (parts, part, index, list) {
+      parts.push(part)
+      if (index !== 0 && index < list.length - 1) parts.push(html`<br>`)
+      return parts
+    }, [])}
+  `
 }
 
 function asElement (richText, linkResolver, serializer) {
