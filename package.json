@@ -7,11 +7,6 @@
     "posttest": "standard",
     "test": "tape test/**/*.js"
   },
-  "browserify": {
-    "transform": [
-      "nanohtml"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tornqvist/prismic-element.git"
@@ -35,7 +30,6 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "nanohtml": "^1.2.4",
     "prismic-helpers": "^1.0.0",
     "prismic-richtext": "^0.4.0"
   }
