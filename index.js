@@ -37,16 +37,17 @@ function serialize (linkResolver, type, element, content, children) {
 
 function serializeImage (linkResolver, element) {
   var img = html`<img src="${element.url}" alt="${element.alt || ''}" width="${element.dimensions.width}" height="${element.dimensions.height}">`
-  var linkUrl = element.linkTo ? LinkHelper.url(element.linkTo, linkResolver) : null
-  var attrs = { href: linkUrl }
-  if (element.linkTo.target && element.linkTo.target === '_blank') {
-    attrs.target = '_blank'
-    attrs.rel = 'noopener noreferrer'
+  if (element.linkTo) {
+    var attrs = { href: LinkHelper.url(element.linkTo, linkResolver) }
+    if (element.linkTo.target && element.linkTo.target === '_blank') {
+      attrs.target = '_blank'
+      attrs.rel = 'noopener noreferrer'
+    }
   }
 
   return html`
     <p class="${element.label || ''} block-img">
-      ${linkUrl ? html`<a ${attrs}>${img}</a>` : img}
+      ${attrs ? html`<a ${attrs}>${img}</a>` : img}
     </p>
   `
 }
