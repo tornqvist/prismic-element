@@ -26,12 +26,12 @@
   },
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
-    "standard": "^10.0.3",
-    "tape": "^4.6.3"
+    "standard": "^14.3.1",
+    "tape": "^4.13.2"
   },
   "dependencies": {
-    "nanohtml": "^1.8.1",
+    "nanohtml": "^1.9.1",
     "prismic-helpers": "^1.0.0",
-    "prismic-richtext": "^0.4.0"
+    "prismic-richtext": "^1.0.3"
   }
 }
