@@ -1,6 +1,6 @@
 {
   "name": "prismic-element",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Render Prismic.io fragments as (real) DOM elements",
   "main": "index.js",
   "scripts": {
