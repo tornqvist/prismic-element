@@ -81,10 +81,20 @@ function serializeLabel (element, children) {
 }
 
 function serializeSpan (content) {
-  if (content && content.indexOf('\n') !== -1) {
-    return raw(content.replace(/\n/g, '<br />'))
+  var str = content.toString()
+
+  if (typeof window === 'undefined') {
+    str = str.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
   }
-  return content
+
+  if (str && str.indexOf('\n') !== -1) {
+    return raw(str.replace(/\n/g, '<br />'))
+  }
+  return str
 }
 
 function asElement (richText, linkResolver, serializer) {
