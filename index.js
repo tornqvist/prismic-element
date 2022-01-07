@@ -106,6 +106,6 @@ function asElement (richText, linkResolver, customSerializer) {
   const elements = serialize(richText, customSerializer
     ? composeSerializers(customSerializer, withLinkResolver)
     : withLinkResolver)
-  if (elements.length === 1) return elements[0]
+  if (Array.isArray(elements) && elements.length === 1) return elements[0]
   return elements
 }
