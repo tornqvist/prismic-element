@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/tornqvist/prismic-element#readme",
   "devDependencies": {
-    "standard": "^14.3.1",
+    "standard": "^16.0.4",
     "tape": "^4.13.2"
   },
   "dependencies": {

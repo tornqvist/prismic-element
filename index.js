@@ -1,14 +1,14 @@
-var html = require('nanohtml')
-var raw = require('nanohtml/raw')
-var PrismicRichText = require('prismic-richtext')
-var LinkHelper = require('prismic-helpers').Link
+const html = require('nanohtml')
+const raw = require('nanohtml/raw')
+const PrismicRichText = require('prismic-richtext')
+const LinkHelper = require('prismic-helpers').Link
 
-var Elements = PrismicRichText.Elements
+const Elements = PrismicRichText.Elements
 
 module.exports = asElement
 
 function serialize (linkResolver, type, element, content, children) {
-  var attrs = {}
+  const attrs = {}
   if (element.label) attrs.class = element.label
 
   switch (type) {
@@ -36,9 +36,11 @@ function serialize (linkResolver, type, element, content, children) {
 }
 
 function serializeImage (linkResolver, element) {
-  var img = html`<img src="${element.url}" alt="${element.alt || ''}" width="${element.dimensions.width}" height="${element.dimensions.height}">`
+  const img = html`<img src="${element.url}" alt="${element.alt || ''}" width="${element.dimensions.width}" height="${element.dimensions.height}">`
+
+  let attrs
   if (element.linkTo) {
-    var attrs = { href: LinkHelper.url(element.linkTo, linkResolver) }
+    attrs = { href: LinkHelper.url(element.linkTo, linkResolver) }
     if (element.linkTo.target && element.linkTo.target === '_blank') {
       attrs.target = '_blank'
       attrs.rel = 'noopener noreferrer'
@@ -53,7 +55,7 @@ function serializeImage (linkResolver, element) {
 }
 
 function serializeEmbed (element) {
-  var attrs = {}
+  const attrs = {}
   if (element.embed_url) attrs['data-oembed'] = element.embed_url
   if (element.type) attrs['data-oembed-type'] = element.type
   if (element.provider_name) attrs['data-oembed-provider'] = element.provider_name
@@ -66,7 +68,7 @@ function serializeEmbed (element) {
 }
 
 function serializeHyperlink (linkResolver, element, children) {
-  var attrs = { href: LinkHelper.url(element.data, linkResolver) }
+  const attrs = { href: LinkHelper.url(element.data, linkResolver) }
   if (element.data.target && element.data.target === '_blank') {
     attrs.target = '_blank'
     attrs.rel = 'noopener noreferrer'
@@ -75,13 +77,13 @@ function serializeHyperlink (linkResolver, element, children) {
 }
 
 function serializeLabel (element, children) {
-  var attrs = {}
+  const attrs = {}
   if (element.data.label) attrs.class = element.data.label
   return html`<span ${attrs}>${children}</span>`
 }
 
 function serializeSpan (content) {
-  var str = content.toString()
+  let str = content.toString()
 
   if (typeof window === 'undefined') {
     str = str.replace(/&/g, '&amp;')
@@ -98,7 +100,7 @@ function serializeSpan (content) {
 }
 
 function asElement (richText, linkResolver, serializer) {
-  var element = PrismicRichText.serialize(richText, serialize.bind(null, linkResolver), serializer)
+  const element = PrismicRichText.serialize(richText, serialize.bind(null, linkResolver), serializer)
   if (element.length === 1) return element[0]
   return element
 }
