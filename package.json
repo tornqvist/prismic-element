@@ -30,6 +30,8 @@
     "tape": "^4.13.2"
   },
   "dependencies": {
+    "@prismicio/helpers": "^2.0.0",
+    "@prismicio/richtext": "^2.0.0",
     "nanohtml": "^1.9.1",
     "prismic-helpers": "^1.0.0",
     "prismic-richtext": "^1.0.3"

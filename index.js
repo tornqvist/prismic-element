@@ -1,36 +1,34 @@
 const html = require('nanohtml')
 const raw = require('nanohtml/raw')
-const PrismicRichText = require('prismic-richtext')
-const LinkHelper = require('prismic-helpers').Link
-
-const Elements = PrismicRichText.Elements
+const { asLink } = require('@prismicio/helpers')
+const { Element, serialize } = require('@prismicio/richtext')
 
 module.exports = asElement
 
-function serialize (linkResolver, type, element, content, children) {
+function serializer (linkResolver, type, element, content, children) {
   const attrs = {}
   if (element.label) attrs.class = element.label
 
   switch (type) {
-    case Elements.heading1: return html`<h1 ${attrs}>${children}</h1>`
-    case Elements.heading2: return html`<h2 ${attrs}>${children}</h2>`
-    case Elements.heading3: return html`<h3 ${attrs}>${children}</h3>`
-    case Elements.heading4: return html`<h4 ${attrs}>${children}</h4>`
-    case Elements.heading5: return html`<h5 ${attrs}>${children}</h5>`
-    case Elements.heading6: return html`<h6 ${attrs}>${children}</h6>`
-    case Elements.paragraph: return html`<p ${attrs}>${children}</p>`
-    case Elements.preformatted: return html`<pre ${attrs}>${children}</pre>`
-    case Elements.strong: return html`<strong ${attrs}>${children}</strong>`
-    case Elements.em: return html`<em ${attrs}>${children}</em>`
-    case Elements.listItem:
-    case Elements.oListItem: return html`<li ${attrs}>${children}</li>`
-    case Elements.list: return html`<ul ${attrs}>${children}</ul>`
-    case Elements.oList: return html`<ol ${attrs}>${children}</ol>`
-    case Elements.image: return serializeImage(linkResolver, element)
-    case Elements.embed: return serializeEmbed(element)
-    case Elements.hyperlink: return serializeHyperlink(linkResolver, element, children)
-    case Elements.label: return serializeLabel(element, children)
-    case Elements.span: return serializeSpan(content)
+    case Element.heading1: return html`<h1 ${attrs}>${children}</h1>`
+    case Element.heading2: return html`<h2 ${attrs}>${children}</h2>`
+    case Element.heading3: return html`<h3 ${attrs}>${children}</h3>`
+    case Element.heading4: return html`<h4 ${attrs}>${children}</h4>`
+    case Element.heading5: return html`<h5 ${attrs}>${children}</h5>`
+    case Element.heading6: return html`<h6 ${attrs}>${children}</h6>`
+    case Element.paragraph: return html`<p ${attrs}>${children}</p>`
+    case Element.preformatted: return html`<pre ${attrs}>${children}</pre>`
+    case Element.strong: return html`<strong ${attrs}>${children}</strong>`
+    case Element.em: return html`<em ${attrs}>${children}</em>`
+    case Element.listItem:
+    case Element.oListItem: return html`<li ${attrs}>${children}</li>`
+    case Element.list: return html`<ul ${attrs}>${children}</ul>`
+    case Element.oList: return html`<ol ${attrs}>${children}</ol>`
+    case Element.image: return serializeImage(linkResolver, element)
+    case Element.embed: return serializeEmbed(element)
+    case Element.hyperlink: return serializeHyperlink(linkResolver, element, children)
+    case Element.label: return serializeLabel(element, children)
+    case Element.span: return serializeSpan(content)
     default: return null
   }
 }
@@ -40,7 +38,7 @@ function serializeImage (linkResolver, element) {
 
   let attrs
   if (element.linkTo) {
-    attrs = { href: LinkHelper.url(element.linkTo, linkResolver) }
+    attrs = { href: asLink(element.linkTo, linkResolver) }
     if (element.linkTo.target && element.linkTo.target === '_blank') {
       attrs.target = '_blank'
       attrs.rel = 'noopener noreferrer'
@@ -68,7 +66,7 @@ function serializeEmbed (element) {
 }
 
 function serializeHyperlink (linkResolver, element, children) {
-  const attrs = { href: LinkHelper.url(element.data, linkResolver) }
+  const attrs = { href: asLink(element.data, linkResolver) }
   if (element.data.target && element.data.target === '_blank') {
     attrs.target = '_blank'
     attrs.rel = 'noopener noreferrer'
@@ -99,8 +97,11 @@ function serializeSpan (content) {
   return str
 }
 
-function asElement (richText, linkResolver, serializer) {
-  const element = PrismicRichText.serialize(richText, serialize.bind(null, linkResolver), serializer)
-  if (element.length === 1) return element[0]
-  return element
+function asElement (richText, linkResolver, customSerializer) {
+  const elements = serialize(richText, function (...args) {
+    if (customSerializer) return customSerializer(...args)
+    return serializer(linkResolver, ...args)
+  })
+  if (elements.length === 1) return elements[0]
+  return elements
 }
