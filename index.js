@@ -1,7 +1,11 @@
 const html = require('nanohtml')
 const raw = require('nanohtml/raw')
 const { asLink } = require('@prismicio/helpers')
-const { Element, serialize } = require('@prismicio/richtext')
+const {
+  Element,
+  serialize,
+  composeSerializers
+} = require('@prismicio/richtext')
 
 module.exports = asElement
 
@@ -98,10 +102,10 @@ function serializeSpan (content) {
 }
 
 function asElement (richText, linkResolver, customSerializer) {
-  const elements = serialize(richText, function (...args) {
-    if (customSerializer) return customSerializer(...args)
-    return serializer(linkResolver, ...args)
-  })
+  const withLinkResolver = serializer.bind(undefined, linkResolver)
+  const elements = serialize(richText, customSerializer
+    ? composeSerializers(customSerializer, withLinkResolver)
+    : withLinkResolver)
   if (elements.length === 1) return elements[0]
   return elements
 }
